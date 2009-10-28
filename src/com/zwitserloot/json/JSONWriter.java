@@ -34,12 +34,12 @@ class JSONWriter {
 	}
 	
 	static String toJSON(String s) {
-		if ( s == null ) return "null";
+		if (s == null) return "null";
 		StringBuilder out = new StringBuilder();
 		out.append('"');
-		for ( int i = 0 ; i < s.length(); i++ ) {
+		for (int i = 0; i < s.length(); i++) {
 			char c = s.charAt(i);
-			if ( c < 0x20 || c == 127 || c == '"' || c == '\\' ) {
+			if (c < 0x20 || c == 127 || c == '"' || c == '\\') {
 				out.append(String.format("\\" + "u%04x", (int)c));
 			} else out.append(c);
 		}
@@ -48,19 +48,19 @@ class JSONWriter {
 	}
 	
 	static String toJSON(Number i) {
-		if ( i == null ) return "null";
+		if (i == null) return "null";
 		String x = i.toString();
-		if ( x.endsWith(".0") ) return x.substring(0, x.length() - 2);
+		if (x.endsWith(".0")) return x.substring(0, x.length() - 2);
 		else return x;
 	}
 	
 	static String toJSON(Character i) {
-		if ( i == null ) return "null";
+		if (i == null) return "null";
 		return toJSON(new String(new char[] {i}));
 	}
 	
 	static String toJSON(Boolean i) {
-		if ( i == null ) return "null";
+		if (i == null) return "null";
 		else return i ? "true" : "false";
 	}
 	
@@ -69,38 +69,38 @@ class JSONWriter {
 	}
 	
 	private static String toJSON0(Object o, IdentityHashMap<Object, Object> refs) {
-		if ( o == null ) return "null";
-		if ( o instanceof Map<?, ?> ) return toJSON0((Map<?, ?>)o, refs);
-		if ( o instanceof Collection<?> ) return toJSON0((Collection<?>)o, refs);
-		if ( o instanceof String ) return toJSON((String)o);
-		if ( o instanceof Character ) return toJSON((Character)o);
-		if ( o instanceof Boolean ) return toJSON((Boolean)o);
-		if ( o.getClass().isArray() ) {
-			if ( refs.put(o, MARKER) != null ) throw new JSONException(
-			  "Circular references not supported (eg: An array containing itself)");
+		if (o == null) return "null";
+		if (o instanceof Map<?, ?>) return toJSON0((Map<?, ?>)o, refs);
+		if (o instanceof Collection<?>) return toJSON0((Collection<?>)o, refs);
+		if (o instanceof String) return toJSON((String)o);
+		if (o instanceof Character) return toJSON((Character)o);
+		if (o instanceof Boolean) return toJSON((Boolean)o);
+		if (o.getClass().isArray()) {
+			if (refs.put(o, MARKER) != null) throw new JSONException(
+					"Circular references not supported (eg: An array containing itself)");
 			int size = Array.getLength(o);
 			List<Object> list = new ArrayList<Object>();
-			for ( int i = 0 ; i < size ; i++ ) list.add(Array.get(o, i));
+			for (int i = 0; i < size; i++) list.add(Array.get(o, i));
 			return toJSON0(list, refs);
 		}
-		if ( VALID_NUMBER_TYPES.contains(o.getClass()) ) return toJSON((Number)o);
+		if (VALID_NUMBER_TYPES.contains(o.getClass())) return toJSON((Number)o);
 		
 		throw new JSONException("Only basic objects can be turned into JSON");
 	}
 	
 	private static String toJSON0(Map<?, ?> in, IdentityHashMap<Object, Object> refs) {
-		if ( in == null ) return "null";
-		if ( refs.put(in, MARKER) != null ) throw new JSONException(
-		  "Circular references not supported (eg: A map containing itself)");
+		if (in == null) return "null";
+		if (refs.put(in, MARKER) != null) throw new JSONException(
+				"Circular references not supported (eg: A map containing itself)");
 		
 		StringBuilder builder = new StringBuilder();
 		builder.append('{');
 		boolean first = true;
-		for ( Map.Entry<?, ?> e : in.entrySet() ) {
-			if ( first ) first = false;
+		for (Map.Entry<?, ?> e : in.entrySet()) {
+			if (first) first = false;
 			else builder.append(',');
 			
-			if ( !(e.getKey() instanceof String) ) throw new JSONException(
+			if (!(e.getKey() instanceof String)) throw new JSONException(
 					"Only Strings allowed as keys in maps");
 			builder.append(toJSON(e.getKey().toString()));
 			builder.append(':');
@@ -113,15 +113,15 @@ class JSONWriter {
 	}
 	
 	private static String toJSON0(Collection<?> in, IdentityHashMap<Object, Object> refs) {
-		if ( in == null ) return "null";
-		if ( refs.put(in, MARKER) != null ) throw new JSONException(
-		  "Circular references not supported (eg: A list containing itself)");
+		if (in == null) return "null";
+		if (refs.put(in, MARKER) != null) throw new JSONException(
+				"Circular references not supported (eg: A list containing itself)");
 		
 		StringBuilder builder = new StringBuilder();
 		builder.append('[');
 		boolean first = true;
-		for ( Object item : in ) {
-			if ( first ) first = false;
+		for (Object item : in) {
+			if (first) first = false;
 			else builder.append(',');
 			
 			builder.append(toJSON0(item, new IdentityHashMap<Object, Object>(refs)));

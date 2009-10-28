@@ -18,13 +18,13 @@ public final class JSON {
 	private static final Object UNDEFINED = new Object();
 	
 	private static String typeOf(Object o) {
-		if ( o == null ) return "null";
-		if ( o == UNDEFINED ) return "undefined";
-		if ( o instanceof String ) return "string";
-		if ( o instanceof Number ) return "number";
-		if ( o instanceof Boolean ) return "boolean";
-		if ( o instanceof List<?> ) return "array";
-		if ( o instanceof Map<?, ?> ) return "object";
+		if (o == null) return "null";
+		if (o == UNDEFINED) return "undefined";
+		if (o instanceof String) return "string";
+		if (o instanceof Number) return "number";
+		if (o instanceof Boolean) return "boolean";
+		if (o instanceof List<?>) return "array";
+		if (o instanceof Map<?, ?>) return "object";
 		
 		return "??" + o.getClass();
 	}
@@ -46,24 +46,24 @@ public final class JSON {
 	private Object dig(int l) {
 		Object out = object;
 		
-		for ( int i = 0 ; i < l ; i++ ) {
+		for (int i = 0; i < l; i++) {
 			Object x = path[i];
-			if ( out == null ) out = UNDEFINED;
-			if ( out == UNDEFINED ) continue;
-			if ( x instanceof Integer ) {
+			if (out == null) out = UNDEFINED;
+			if (out == UNDEFINED) continue;
+			if (x instanceof Integer) {
 				int idx = ((Integer)x).intValue();
 				try {
 					out = ((List<?>)out).get(idx);
-				} catch ( Exception e ) {
+				} catch (Exception e) {
 					out = UNDEFINED;
 				}
 			} else {
 				String key = (String)x;
 				try {
 					Map<?, ?> m = (Map<?, ?>)out;
-					if ( !m.containsKey(key) ) out = UNDEFINED;
+					if (!m.containsKey(key)) out = UNDEFINED;
 					else out = m.get(key);
-				} catch ( Exception e ) {
+				} catch (Exception e) {
 					out = UNDEFINED;
 				}
 			}
@@ -99,7 +99,7 @@ public final class JSON {
 	public String getPath(int len) {
 		StringBuilder out = new StringBuilder("~");
 		len = len == -1 ? path.length : len;
-		for ( int i = 0 ; i < len ; i++ )
+		for (int i = 0; i < len; i++)
 			out.append("/").append(path[i]);
 		return out.toString();
 	}
@@ -122,7 +122,7 @@ public final class JSON {
 	}
 
 	private void invalidType(String targetType) {
-		if ( dig() == UNDEFINED ) throw new JSONException("Key " + getPath() + " does not exist");
+		if (dig() == UNDEFINED) throw new JSONException("Key " + getPath() + " does not exist");
 		else {
 			String jsType = typeOf(dig());
 			throw new JSONException("Key " + getPath() + " contains a " + jsType + " which is not convertable to a " + targetType);
@@ -135,7 +135,7 @@ public final class JSON {
 	
 	public boolean isNull() {
 		Object o = dig();
-		if ( o == UNDEFINED ) {
+		if (o == UNDEFINED) {
 			invalidType("null");
 			return false;
 		} else return o == null;
@@ -144,7 +144,7 @@ public final class JSON {
 	public Object asObject() {
 		Object o = dig();
 		
-		if ( o == UNDEFINED ) {
+		if (o == UNDEFINED) {
 			invalidType("object");
 			return null;
 		}
@@ -155,16 +155,16 @@ public final class JSON {
 	public Object asObject(Object alt) {
 		try {
 			return asObject();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
 	
 	public String asString() {
 		Object o = dig();
-		if ( o == null ) return null;
+		if (o == null) return null;
 		String t = typeOf(o);
-		if ( t.equals("number") || t.equals("string") || t.equals("boolean") ) return String.valueOf(o);
+		if (t.equals("number") || t.equals("string") || t.equals("boolean")) return String.valueOf(o);
 		invalidType("string");
 		return null;
 	}
@@ -173,7 +173,7 @@ public final class JSON {
 		try {
 			String x = asString();
 			return x == null ? alt : x;
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
@@ -182,15 +182,15 @@ public final class JSON {
 		Object o = dig();
 		Number n = null;
 		try {
-			if ( o instanceof Number ) n = (Number)o;
-			else if ( o instanceof String ) {
+			if (o instanceof Number) n = (Number)o;
+			else if (o instanceof String) {
 				String s = String.valueOf(o);
-				if ( s.indexOf(".") > -1 ) n = Double.parseDouble(s);
-				if ( expected.equals("int") ) n = Integer.parseInt(s);
-				else if ( expected.equals("long") ) n = Long.parseLong(s);
+				if (s.indexOf(".") > -1) n = Double.parseDouble(s);
+				if (expected.equals("int")) n = Integer.parseInt(s);
+				else if (expected.equals("long")) n = Long.parseLong(s);
 				else n = Double.parseDouble(s);
 			} else throw new IllegalArgumentException();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			invalidType(expected);
 			return 0.0;
 		}
@@ -205,7 +205,7 @@ public final class JSON {
 	public double asDouble(double alt) {
 		try {
 			return asDouble();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
@@ -213,7 +213,7 @@ public final class JSON {
 	public int asInt() {
 		double v = asNumber("int").doubleValue();
 		int v2 = (int)v;
-		if ( v != v2 ) {
+		if (v != v2) {
 			notIntegral(v);
 			return 0;
 		} else return v2;
@@ -222,7 +222,7 @@ public final class JSON {
 	public int asInt(int alt) {
 		try {
 			return asInt();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
@@ -231,12 +231,12 @@ public final class JSON {
 	
 	public long asLong() {
 		Number n = asNumber("long");
-		if ( n instanceof Double ) {
+		if (n instanceof Double) {
 			long l = n.longValue();
-			if ( l <= MAXIMUM_PRECISION_DOUBLE && l>= -MAXIMUM_PRECISION_DOUBLE ) {
+			if (l <= MAXIMUM_PRECISION_DOUBLE && l>= -MAXIMUM_PRECISION_DOUBLE) {
 				double l2 = n.doubleValue();
 				double l3 = l;
-				if ( l3 != l2 ) {
+				if (l3 != l2) {
 					invalidType("long");
 					return 0L;
 				} else return l;
@@ -248,36 +248,36 @@ public final class JSON {
 	public long asLong(long alt) {
 		try {
 			return asLong();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
 	
 	public char asChar() {
 		String s = asString();
-		if ( s.length() > 0 ) return s.charAt(0);
+		if (s.length() > 0) return s.charAt(0);
 		throw new JSONException("Key " + getPath() + " contains the empty string, which is not convertable to a char");
 	}
 	
 	public char asChar(char alt) {
 		try {
 			return asChar();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
 	
 	public <E extends Enum<E>> E asEnum(Class<E> enumType) {
 		Object o = dig();
-		if ( o == null ) return null;
-		if ( !(o instanceof String) ) {
+		if (o == null) return null;
+		if (!(o instanceof String)) {
 			invalidType("enum");
 			return null;
 		}
 		
 		try {
 			return Enum.valueOf(enumType, (String)o);
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			throw new JSONException("Key " + getPath() + " contains '" + o + "' which is not a value for enum '" + enumType.getName());
 		}
 	}
@@ -286,7 +286,7 @@ public final class JSON {
 		E value;
 		try {
 			value = asEnum(enumType);
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 		
@@ -296,15 +296,15 @@ public final class JSON {
 	public boolean asBoolean() {
 		Object o = dig();
 		String t = typeOf(o);
-		if ( t.equals("number") ) return ((Number)o).doubleValue() != 0;
-		if ( t.equals("string") ) {
+		if (t.equals("number")) return ((Number)o).doubleValue() != 0;
+		if (t.equals("string")) {
 			String s = " " + o.toString().toLowerCase() + " ";
-			if ( " true yes 1 t y on ".indexOf(s) > -1 ) return true;
-			if ( " false no 0 f n off ".indexOf(s) > -1 ) return false;
+			if (" true yes 1 t y on ".indexOf(s) > -1) return true;
+			if (" false no 0 f n off ".indexOf(s) > -1) return false;
 			notABoolean(s);
 			return false;
 		}
-		if ( t.equals("boolean") ) return ((Boolean)o).booleanValue();
+		if (t.equals("boolean")) return ((Boolean)o).booleanValue();
 		invalidType("boolean");
 		return false;
 	}
@@ -312,7 +312,7 @@ public final class JSON {
 	public boolean asBoolean(boolean alt) {
 		try {
 			return asBoolean();
-		} catch ( Exception e ) {
+		} catch (Exception e) {
 			return alt;
 		}
 	}
@@ -356,18 +356,18 @@ public final class JSON {
 		}
 		
 		public JSON get(int index) {
-			if ( index < 0 || limit > -1 && index >= limit ) throw new IndexOutOfBoundsException();
+			if (index < 0 || limit > -1 && index >= limit) throw new IndexOutOfBoundsException();
 			Object o = json.dig();
-			if ( o == UNDEFINED ) {
+			if (o == UNDEFINED) {
 				json.invalidType("array");
 				return null;
 			}
 			
-			if ( o instanceof List<?> ) {
-				if ( index < size() ) return json.get(index + offset);
+			if (o instanceof List<?>) {
+				if (index < size()) return json.get(index + offset);
 				else throw new IndexOutOfBoundsException();
-			} else if ( o == null ) throw new IndexOutOfBoundsException();
-			else if ( index == offset ) return json;
+			} else if (o == null) throw new IndexOutOfBoundsException();
+			else if (index == offset) return json;
 			else throw new IndexOutOfBoundsException();
 		}
 		
@@ -388,7 +388,7 @@ public final class JSON {
 				}
 				
 				public JSON next() {
-					if ( !hasNext() ) throw new NoSuchElementException();
+					if (!hasNext()) throw new NoSuchElementException();
 					return get(pos++);
 				}
 				
@@ -431,22 +431,22 @@ public final class JSON {
 		}
 		
 		public int size() {
-			if ( limit >= 0 ) return limit - offset;
+			if (limit >= 0) return limit - offset;
 			
 			Object o = json.dig();
-			if ( o instanceof List<?> ) return ((List<?>)o).size();
-			if ( o == UNDEFINED ) {
+			if (o instanceof List<?>) return ((List<?>)o).size();
+			if (o == UNDEFINED) {
 				json.invalidType("array");
 				return 0;
 			}
-			if ( o == null ) return 0;
+			if (o == null) return 0;
 			return 1;
 		}
 		
 		public List<JSON> subList(int fromIndex, int toIndex) {
-			if ( toIndex < fromIndex ) throw new IllegalArgumentException();
-			if ( fromIndex < 0 ) throw new IndexOutOfBoundsException();
-			if ( toIndex > size() ) throw new IndexOutOfBoundsException();
+			if (toIndex < fromIndex) throw new IllegalArgumentException();
+			if (fromIndex < 0) throw new IndexOutOfBoundsException();
+			if (toIndex > size()) throw new IndexOutOfBoundsException();
 			
 			return new JSONList(json, offset + fromIndex, offset + toIndex);
 		}
@@ -461,11 +461,11 @@ public final class JSON {
 		
 		@Override public String toString() {
 			Object o = json.dig();
-			if ( o == UNDEFINED ) return "[List: UNDEFINED]";
+			if (o == UNDEFINED) return "[List: UNDEFINED]";
 			StringBuilder sb = new StringBuilder();
 			sb.append("[");
-			for ( int i = 0 ; i < size() ; i++ ) {
-				if ( i > 0 ) sb.append(", ");
+			for (int i = 0; i < size(); i++) {
+				if (i > 0) sb.append(", ");
 				sb.append(get(i));
 			}
 			sb.append("]");
@@ -475,7 +475,7 @@ public final class JSON {
 	
 	public List<JSON> asList() {
 		Object o = dig();
-		if ( o == null || o == UNDEFINED ) return Collections.emptyList();
+		if (o == null || o == UNDEFINED) return Collections.emptyList();
 		else return new JSONList(this, 0, -1);
 	}
 	
@@ -483,9 +483,9 @@ public final class JSON {
 		Set<String> set = new HashSet<String>();
 		
 		Object o = dig();
-		if ( o instanceof Map<?, ?> )
-			for ( Object k : ((Map<?, ?>)o).keySet() ) set.add(String.valueOf(k));
-		else if ( o != null && o != UNDEFINED ) {
+		if (o instanceof Map<?, ?>) {
+			for (Object k : ((Map<?, ?>)o).keySet()) set.add(String.valueOf(k));
+		} else if (o != null && o != UNDEFINED) {
 			invalidType("object");
 			return null;
 		}
@@ -503,15 +503,15 @@ public final class JSON {
 	public JSON add() {
 		Object o = dig();
 		int i = 0;
-		if ( o instanceof List<?> ) i = ((List<?>)o).size();
-		else if ( o == UNDEFINED || o == null ) i = 0;
+		if (o instanceof List<?>) i = ((List<?>)o).size();
+		else if (o == UNDEFINED || o == null) i = 0;
 		else structureError(path.length, "array");
 		
 		return new JSON(addToPath(path, i), object);
 	}
 	
 	public JSON get(int idx) {
-		if ( idx < 0 ) {
+		if (idx < 0) {
 			indexError(idx);
 			return null;
 		}
@@ -532,7 +532,7 @@ public final class JSON {
 	}
 	
 	public void setLong(long value) {
-		if ( value <= -MAXIMUM_PRECISION_DOUBLE || value >= MAXIMUM_PRECISION_DOUBLE ) setString(String.valueOf(value));
+		if (value <= -MAXIMUM_PRECISION_DOUBLE || value >= MAXIMUM_PRECISION_DOUBLE) setString(String.valueOf(value));
 		else setDouble(value);
 	}
 	
@@ -545,7 +545,7 @@ public final class JSON {
 	}
 	
 	public void setEnum(Enum<?> value) {
-		if ( value == null ) createAndSet(null);
+		if (value == null) createAndSet(null);
 		setString(value.name());
 	}
 	
@@ -572,43 +572,43 @@ public final class JSON {
 	@SuppressWarnings("unchecked")
 	private void createAndSet(Object toSet) {
 		int l = path.length;
-		if ( l == 0 ) throw new IllegalStateException();
+		if (l == 0) throw new IllegalStateException();
 		
 		Object o = object;
 		Object k = path[0];
 		boolean x = k instanceof Number;
 		Object m = null;
 		boolean y = false;
-		for ( int i = 1 ; i <= l ; i++ ) {
-			if ( i < l ) {
+		for (int i = 1; i <= l; i++) {
+			if (i < l) {
 				m = path[i];
 				y = m instanceof Number;
 				
-				if ( o instanceof List ) {
-					if ( !x ) {
+				if (o instanceof List) {
+					if (!x) {
 						structureError(i, "array");
 						return;
 					}
 					List<?> list = (List<?>)o;
 					int idx = ((Number)k).intValue();
-					if ( idx < -1 || idx > list.size() ) {
+					if (idx < -1 || idx > list.size()) {
 						listTooSmallError(i -1);
 						return;
 					}
-					if ( idx < list.size() ) {
+					if (idx < list.size()) {
 						o = list.get(idx);
 						k = m; x = y;
 						continue;
 					}
-				} else if ( o instanceof Map ) {
-					if ( x ) {
+				} else if (o instanceof Map) {
+					if (x) {
 						structureError(i, "object");
 						return;
 					}
 					
 					String key = String.valueOf(k);
 					Map<?, ?> map = (Map<?, ?>)o;
-					if ( map.containsKey(key) ) {
+					if (map.containsKey(key)) {
 						o = map.get(key);
 						k = m; x = y;
 						continue;
@@ -617,10 +617,10 @@ public final class JSON {
 			}
 			
 			Object z = i < l ? (y ? new ArrayList<Object>() : new HashMap<Object, Object>()) : toSet;
-			if ( x ) {
+			if (x) {
 				int len = ((List<?>)o).size();
 				int idx = ((Number)k).intValue();
-				if ( idx == -1 || idx == len ) {
+				if (idx == -1 || idx == len) {
 					path[i-1] = len;
 					((List<Object>)o).add(z);
 				} else ((List<Object>)o).set(idx, z);
@@ -632,7 +632,7 @@ public final class JSON {
 	
 	@Override public String toString() {
 		Object o = dig();
-		if ( o == UNDEFINED ) return getPath() + ": UNDEFINED";
+		if (o == UNDEFINED) return getPath() + ": UNDEFINED";
 		else return getPath() + ": " + JSONWriter.toJSON(o);
 	}
 }

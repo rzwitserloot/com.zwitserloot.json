@@ -20,12 +20,12 @@ public class JSONTest{
 		try {
 			JSON.parse("[1, 2]").asString();
 			fail("JSONException expected");
-		} catch ( JSONException expected ) {}
+		} catch (JSONException expected) {}
 		
 		try {
 			JSON.parse("{\"foo\": 1}").asString();
 			fail("JSONException expected");
-		} catch ( JSONException expected ) {}
+		} catch (JSONException expected) {}
 		
 		assertEquals("foo", JSON.parse("[null]").get(0).asString("foo"));
 	}
@@ -155,8 +155,8 @@ public class JSONTest{
 		try {
 			iterator.next();
 			fail("JSON.asList().iterator() does not throw an exception when there are no more elements.");
-		} catch ( NoSuchElementException expected ) {
-		} catch ( Exception e ) {
+		} catch (NoSuchElementException expected) {
+		} catch (Exception e) {
 			fail("JSON.asList().iterator() throws the wrong exception when there are no more elements: " + e);
 		}
 		
@@ -184,7 +184,7 @@ public class JSONTest{
 		try {
 			JSON.parse("{\"a\": {\"foo\": 1}, \"b\": [1, 2], \"c\": {\"e\": 3, {\"bar\": 2}}, \"d\": 4}");
 			fail("Faulty json with a keyless entry in an inner map was accepted");
-		} catch ( JSONException expected ) {}
+		} catch (JSONException expected) {}
 		
 		JSON json = JSON.parse("{a: {foo: 1}, b: [1, 2], c: {e: 3, f: {bar: 2}}, d: 4}");
 		
@@ -193,7 +193,7 @@ public class JSONTest{
 		try {
 			json.get("d").keySet();
 			fail("keySet() on a non-Map entry did not trigger an exception");
-		} catch ( JSONException expected ) {}
+		} catch (JSONException expected) {}
 		
 		Set<String> keys = json.keySet();
 		assertEquals(4, keys.size());
@@ -256,7 +256,7 @@ public class JSONTest{
 		try {
 			JSON.newMap().add().setInt(10);
 			fail("Attempt to add an array entry to a map did not cause a JSONException");
-		} catch ( JSONException expected ) {}
+		} catch (JSONException expected) {}
 		
 		json = JSON.newList();
 		JSON i1 = json.add();
@@ -318,7 +318,7 @@ public class JSONTest{
 		try {
 			json.get(2).asLong();
 			fail("A double value (with fraction) was readable as a long");
-		} catch ( JSONException expected ) {}
+		} catch (JSONException expected) {}
 	}
 	
 	@Test
