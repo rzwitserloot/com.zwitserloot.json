@@ -154,7 +154,8 @@ public final class JSON {
 	
 	public Object asObject(Object alt) {
 		try {
-			return asObject();
+			Object x = asObject();
+			return x == null ? alt : x;
 		} catch (Exception e) {
 			return alt;
 		}
@@ -567,6 +568,23 @@ public final class JSON {
 	
 	public void setWithJSON(JSON json) {
 		createAndSet(json.dig());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public void mixin(JSON json) {
+		Object me = this.dig();
+		Object other = json.dig();
+		
+		if (me instanceof Map<?, ?> && other instanceof Map<?, ?>) {
+			((Map<Object, Object>)me).putAll((Map<?, ?>)other);
+			return;
+		}
+		
+		if (me instanceof List<?> && other instanceof List<?>) {
+			((List<Object>)me).addAll((List<?>)other);
+		}
+		
+		throw new IllegalStateException();
 	}
 	
 	@SuppressWarnings("unchecked")
