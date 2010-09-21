@@ -23,23 +23,23 @@ Similarly, to set a new value:
 
 A JSON instance isn't just a representation of an actual JSON structure, but it also includes your position inside it; a JSON blob has structure, after all. For example, if we have:
 
-	{
-		films: [
-			{
-				name: "Serenity",
-				director: {
-					name: "Joss Whedon",
-					age: 45
-				}
-			},
-			{
-				name: "A few good men",
-				director: {
-					name: "Rob Reiner"
-				}
-			}
-		]
-	}
+  {
+    films: [
+      {
+        name: "Serenity",
+        director: {
+          name: "Joss Whedon",
+          age: 45
+        }
+      },
+      {
+        name: "A few good men",
+        director: {
+          name: "Rob Reiner"
+        }
+      }
+    ]
+  }
 
 then you can query values from it like so:
 
@@ -58,7 +58,7 @@ the default, or an exception if you didn't specify a default. This is not only c
 	serenity.get("director").get("age").setInt(45);
 	JSON fewGoodMen = json.get("films").add();
 	fewGoodMen.get("name").setString("A few good men");
-	fewGoodMen.get("directory").get("name").setString("Rob Reiner");
+	fewGoodMen.get("director").get("name").setString("Rob Reiner");
 	String jsonString = json.toJSON();
 
 ### Reading from lists and maps
@@ -80,6 +80,12 @@ To navigate through a list node, use the `asList()` method:
 
 The `asList()` method is smart enough to have zero size if the node doesn't exist, and to form a list containing just one element if you're on a simple (non-list, non-map) element. In fact, this applies generally to the com.zwitserloot.json library: For example, trying to grab a string node via 'asInt()' will attempt to parse the string as an int.
 
+There are also a few convenience methods, such as a way to treat a json object as a list of strings.
+
 ### Writing lists and maps
 
 You've already seen how to write maps; just `get` the key name then start using the `setX` methods. To write into a list, use the magic `add()` method. add() itself doesn't actually create anything, but once you start writing to a JSON instance returned by the `add()` method, writing occurs. See the 'write' example from earlier.
+
+### Downloading
+
+You can download source, javadoc, and binaries from [http://github.com/rzwitserloot/com.zwitserloot.json/downloads](http://github.com/rzwitserloot/com.zwitserloot.json/downloads)
