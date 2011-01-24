@@ -14,7 +14,7 @@ class JSONParser {
 	
 	JSONParser(String string) {
 		this.string = stripComments(string);
-		this.len = string.length();
+		this.len = this.string.length();
 	}
 	
 	private static String stripComments(String in) {
