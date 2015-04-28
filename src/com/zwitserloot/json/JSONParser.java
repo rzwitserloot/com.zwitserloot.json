@@ -11,6 +11,7 @@ class JSONParser {
 	private final String string;
 	private final int len;
 	private int pos = 0;
+	static final Object NULL = new Object();
 	
 	JSONParser(String string) {
 		this.string = stripComments(string);
@@ -51,7 +52,7 @@ class JSONParser {
 			}
 			if (pos + 2 < len && string.substring(pos -1, pos +3).equals("null")) {
 				pos += 3;
-				return null;
+				return NULL;
 			}
 			if (c == '-' || c == '0' || (c >= '1' && c <= '9')) return parseNumber();
 			return jsonError("Invalid character - expected a string, array, object, 'true', 'false', 'null', or number.");

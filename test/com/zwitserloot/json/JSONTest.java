@@ -2,6 +2,7 @@ package com.zwitserloot.json;
 
 import static org.junit.Assert.*;
 
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -275,11 +276,14 @@ public class JSONTest{
 	
 	public enum Colour { RED, GREEN, BLUE; }
 	
+	@Test
 	public void testSetAndGetEnum() {
 		JSON json = JSON.newList();
 		json.add().setEnum(Colour.GREEN);
 		assertEquals(Colour.GREEN, json.get(0).asEnum(Colour.class));
 		assertEquals("[\"GREEN\"]", json.toJSON());
+		assertEquals(Colour.GREEN, JSON.parse("\"GrEeN\"").asEnum(Colour.class));
+		assertEquals(Colour.RED, JSON.parse("\"GrEeN2\"").asEnum(Colour.class, Colour.RED));
 	}
 	
 	@Test
@@ -329,5 +333,21 @@ public class JSONTest{
 		JSON jsonOuter = JSON.newMap();
 		jsonOuter.get("baz").setWithJSON(jsonInner);
 		assertEquals("{\"baz\":[{\"foo\":5},{\"bar\":10}]}", jsonOuter.toJSON());
+	}
+	
+	@Test
+	public void testStringList() {
+		JSON json = JSON.parse("[\"foo\", true, null, 5, \"b\"]");
+		assertEquals(Arrays.<String>asList("foo", "true", null, "5", "b"), json.asStringList());
+	}
+	
+	@Test
+	public void testNumberPrinting() {
+		JSON json = JSON.newList();
+		json.add().setInt(5);
+		json.add().setDouble(5.0);
+		json.add().setDouble(5.00001);
+		json.add().setObject(Byte.valueOf((byte) 2));
+		assertEquals("[5,5,5.00001,2]", json.toJSON());
 	}
 }

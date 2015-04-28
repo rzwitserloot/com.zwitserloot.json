@@ -25,7 +25,7 @@ com.zwitserloot.json is a library to create, parse, and manipulate JSON.
 See http://json.org/ for more information about the JSON format.
 Example use: JSON.parse(someJsonString).get("films").get(0).get("director").get("age").asInt();
 	</description>
-	<property name="version" value="1.0" />
+	<property name="version" value="1.1" />
 	
 	<target name="clean" description="Deletes build artefacts (everything made by this script)">
 		<delete quiet="true" dir="dist" />

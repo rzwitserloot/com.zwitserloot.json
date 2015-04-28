@@ -33,6 +33,8 @@ class JSONWriter {
 		//Utility class
 	}
 	
+	private static final long MAXIMUM_PRECISION_DOUBLE = 1L << 52 -1;
+	
 	static String toJSON(String s) {
 		if (s == null) return "null";
 		StringBuilder out = new StringBuilder();
@@ -49,9 +51,23 @@ class JSONWriter {
 	
 	static String toJSON(Number i) {
 		if (i == null) return "null";
-		String x = i.toString();
-		if (x.endsWith(".0")) return x.substring(0, x.length() - 2);
-		else return x;
+		
+		if (i instanceof Long) {
+			long v = ((Long) i).longValue();
+			if (v >= MAXIMUM_PRECISION_DOUBLE || v < -MAXIMUM_PRECISION_DOUBLE) return toJSON(String.valueOf(v));
+			return i.toString();
+		}
+		
+		if (i instanceof Short || i instanceof Byte || i instanceof Integer) return i.toString();
+		
+		if (i instanceof Float || i instanceof Double) {
+			long v = i.longValue();
+			double d = i.doubleValue();
+			if (v == d) return "" + v;
+			return i.toString();
+		}
+		
+		return toJSON(String.valueOf(i));
 	}
 	
 	static String toJSON(Character i) {
@@ -70,11 +86,12 @@ class JSONWriter {
 	
 	private static String toJSON0(Object o, IdentityHashMap<Object, Object> refs) {
 		if (o == null) return "null";
-		if (o instanceof Map<?, ?>) return toJSON0((Map<?, ?>)o, refs);
-		if (o instanceof Collection<?>) return toJSON0((Collection<?>)o, refs);
-		if (o instanceof String) return toJSON((String)o);
-		if (o instanceof Character) return toJSON((Character)o);
-		if (o instanceof Boolean) return toJSON((Boolean)o);
+		if (o instanceof Map<?, ?>) return toJSON0((Map<?, ?>) o, refs);
+		if (o instanceof Collection<?>) return toJSON0((Collection<?>) o, refs);
+		if (o instanceof String) return toJSON((String) o);
+		if (o instanceof Character) return toJSON((Character) o);
+		if (o instanceof Boolean) return toJSON((Boolean) o);
+		
 		if (o.getClass().isArray()) {
 			if (refs.put(o, MARKER) != null) throw new JSONException(
 					"Circular references not supported (eg: An array containing itself)");
@@ -83,7 +100,7 @@ class JSONWriter {
 			for (int i = 0; i < size; i++) list.add(Array.get(o, i));
 			return toJSON0(list, refs);
 		}
-		if (VALID_NUMBER_TYPES.contains(o.getClass())) return toJSON((Number)o);
+		if (VALID_NUMBER_TYPES.contains(o.getClass())) return toJSON((Number) o);
 		
 		throw new JSONException("Only basic objects can be turned into JSON");
 	}
