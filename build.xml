@@ -27,6 +27,12 @@ Example use: JSON.parse(someJsonString).get("films").get(0).get("director").get(
 	</description>
 	<property name="version" value="1.1" />
 	
+	<path id="classpath.tests">
+		<fileset dir="lib/test">
+			<include name="**/*.jar" />
+		</fileset>
+	</path>
+
 	<target name="clean" description="Deletes build artefacts (everything made by this script)">
 		<delete quiet="true" dir="dist" />
 		<delete quiet="true" dir="build" />
@@ -93,16 +99,16 @@ Example use: JSON.parse(someJsonString).get("films").get(0).get("director").get(
 		<javac debug="true" target="1.5" destdir="build/tests" srcdir="test">
 			<classpath>
 				<pathelement path="build/main" />
-				<pathelement path="lib/test/junit.jar" />
 			</classpath>
+			<classpath refid="classpath.tests" />
 		</javac>
 		<junit haltonfailure="yes" fork="on">
 			<formatter type="plain" usefile="false" unless="tests.quiet" />
 			<classpath>
-				<pathelement path="lib/test/junit.jar" />
 				<pathelement path="build/main" />
 				<pathelement path="build/tests" />
 			</classpath>
+			<classpath refid="classpath.tests" />
 			<batchtest>
 				<fileset dir="test">
 					<include name="**/*Test*.java" />
