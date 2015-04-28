@@ -76,21 +76,24 @@ public final class JSON {
 	}
 	
 	/**
-	 * Creates a new JSON object that represents a new empty object.
+	 * @return Creates a new JSON object that represents a new empty object and returns it.
 	 */
 	public static JSON newMap() {
 		return new JSON(new LinkedHashMap<Object, Object>());
 	}
 	
 	/**
-	 * Creates a new JSON object that represents a new empty list.
+	 * @return Creates a new JSON object that represents a new empty list and returns it.
 	 */
 	public static JSON newList() {
 		return new JSON(new ArrayList<Object>());
 	}
 	
 	/**
-	 * Creates a new JSON object by parsing JSON.
+	 * Parses JSON formatted strings into a new {@code JSON} object.
+	 * 
+	 * @param s JSON formatted input.
+	 * @return Creates a new JSON object by parsing JSON and returns it.
 	 */
 	public static JSON parse(String s) {
 		return new JSON(new JSONParser(s).parseObject());
@@ -100,6 +103,8 @@ public final class JSON {
 	 * Creates a new JSON object where all collection (maps and lists) objects starting from this element and delving arbitrarily deep are copied.
 	 * 
 	 * The returned object is a root even if this object is not.
+	 * 
+	 * @return Deep copy clone of this object as a new root.
 	 */
 	public JSON deepCopy() {
 		if (self instanceof Map<?, ?>) {
@@ -126,28 +131,37 @@ public final class JSON {
 	}
 	
 	/**
-	 * Converts the this element to compact JSON representation.
+	 * @return Converts the this element to compact JSON representation and returns it.
 	 */
 	public String toJSON() {
 		return JSONWriter.toJSON(self);
 	}
 	
 	/**
-	 * Checks if this element exists.
+	 * @return Returns {@code true} if this element exists, {@code false} otherwise.
 	 */
 	public boolean exists() {
 		return self != UNDEFINED;
 	}
 	
 	/**
-	 * Returns the 'path' (each key / index from the root, separated by slashes, starting with a ~) of this element.
+	 * Prints the location within the JSON structure this element represents.
+	 * 
+	 * Paths form when you use one of the {@code get()} methods.
+	 * 
+	 * @return The 'path' (each key / index from the root, separated by slashes, starting with a ~) of this element.
 	 */
 	public String getPath() {
 		return getPath(-1);
 	}
 	
 	/**
-	 * Returns the 'path' (each key / index from the root, separated by slashes, starting with a ~), of this element, but but no more path segments than {@code len} are printed.
+	 * Prints the location within the JSON structure this element represents, but no further than a given limit.
+	 * 
+	 * Paths form when you use one of the {@code get()} methods.
+	 * 
+	 * @param len No more than this many path elements are included in the string.
+	 * @return The 'path' (each key / index from the root, separated by slashes, starting with a ~), of this element, but but no more path segments than {@code len} are printed.
 	 */
 	public String getPath(int len) {
 		len = len == -1 ? path.length : len;
@@ -159,7 +173,8 @@ public final class JSON {
 	/**
 	 * If this element exists, returns whether it is {@code null} or not.
 	 * 
-	 * @JSONException If this element does not exist.
+	 * @return {@code true} if this element represents {@code null}, {@code false} if it does not, and an exceptio is thrown if this element is non-existent.
+	 * @throws JSONException If this element does not exist.
 	 */
 	public boolean isNull() {
 		if (self == UNDEFINED) {
@@ -174,6 +189,9 @@ public final class JSON {
 	 * If this element exists, returns whether it is {@code null} or not.
 	 * 
 	 * If this element does not exist, {@code defaultValue} is returned.
+	 * 
+	 * @param defaultValue the value to return if this element is non-existent.
+	 * @return {@code true} if this element represents {@code null}, {@code false} if it does not, and the {@code defaultValue} if this element is non-existent.
 	 */
 	public boolean isNull(boolean defaultValue) {
 		if (self == UNDEFINED) return defaultValue;
@@ -181,8 +199,9 @@ public final class JSON {
 	}
 	
 	/**
-	 * Returns this object if it exists.
+	 * Returns this object if it exists; you should probably use one of the more specific {@code asX()} methods instead to coerce the type to what you expect!
 	 * 
+	 * @return This node as a java object.
 	 * @throws JSONException If this element does not exist.
 	 */
 	public Object asObject() {
@@ -202,7 +221,12 @@ public final class JSON {
 	}
 	
 	/**
+	 * Returns this object if it exists; you should probably use one of the more specific {@code asX()} methods instead to coerce the type to what you expect!
+	 * 
 	 * If this element is non existent or {@code null}, the {@code alt} value is returned. Otherwise, the object is returned as is.
+	 * 
+	 * @param alt The value to return if this node is non-existent.
+	 * @return This node as a java object unless it is {@code null} or non-existent, in which case {@code alt} is returned instead.
 	 */
 	public Object asObject(Object alt) {
 		if (self == UNDEFINED || self == NULL) return alt;
@@ -212,6 +236,7 @@ public final class JSON {
 	/**
 	 * If this element is a string or {@code null} it is returned; if it is a number or boolean, it is converted to a string and returned.
 	 * 
+	 * @return The value of this element coerced to a string if possible.
 	 * @throws JSONException If the element is non-existent or not convertible to a string.
 	 */
 	public String asString() {
@@ -226,6 +251,9 @@ public final class JSON {
 	 * If this element is a string it is returned; if it is a number or boolean, it is converted to a string and returned.
 	 * 
 	 * Otherwise (including if it is {@code null}), {@code alt} is returned.
+	 * 
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to a string.
+	 * @return The value of this element coerced to a string if possible, otherwise {@code alt}.
 	 */
 	public String asString(String alt) {
 		if (self == NULL) return alt;
@@ -237,6 +265,7 @@ public final class JSON {
 	/**
 	 * If this element is a number or is a string that can be parsed with {@code Double.parseDouble}, it is returned as double.
 	 * 
+	 * @return The value of this element coerced to a double if possible.
 	 * @throws JSONException If this key is null, or non-existent, or not numeric and not a string parseable as such.
 	 */
 	public double asDouble() {
@@ -256,6 +285,9 @@ public final class JSON {
 	 * If this element is a number or is a string that can be parsed with {@code Double.parseDouble}, it is returned as double.
 	 * 
 	 * Otherwise, {@code alt} is returned.
+	 * 
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to a double.
+	 * @return The value of this element coerced to a double if possible, otherwise {@code alt}.
 	 */
 	public double asDouble(double alt) {
 		if (self instanceof Number) return ((Number) self).doubleValue();
@@ -274,7 +306,8 @@ public final class JSON {
 	 * If this element is a number that has no floating point component, or
 	 * is a string that can be parsed with {@code Double.parseDouble} that has no floating point component, it is returned as int.
 	 * 
-	 * @throws JSONException If this key is null, or non-existent, or not numeric and integral and not a string parseable as such.
+	 * @return The value of this element coerced to an int if possible.
+	 * @throws JSONException If the element is non-existent or not convertible to an int.
 	 */
 	public int asInt() {
 		double v;
@@ -301,6 +334,9 @@ public final class JSON {
 	 * is a string that can be parsed with {@code Double.parseDouble} that has no floating point component, it is returned as int.
 	 * 
 	 * Otherwise, {@code alt} is returned.
+	 * 
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to an int.
+	 * @return The value of this element coerced to an int if possible, otherwise {@code alt}.
 	 */
 	public int asInt(int alt) {
 		double v;
@@ -326,7 +362,8 @@ public final class JSON {
 	 * If this element is a number that has no floating point component, or has sufficient magnitude that a double cannot accurately represent it, or
 	 * is a string that can be parsed with {@code Double.parseDouble} with those rules or {@code Long.parseLong}, it is returned as long.
 	 * 
-	 * @throws JSONException If this key is null, or non-existent, or not numeric and integral and not a string parseable as such.
+	 * @return The value of this element coerced to a long if possible.
+	 * @throws JSONException If the element is non-existent or not convertible to a long.
 	 */
 	public long asLong() {
 		double v;
@@ -367,6 +404,9 @@ public final class JSON {
 	 * is a string that can be parsed with {@code Double.parseDouble} with those rules or {@code Long.parseLong}, it is returned as long.
 	 * 
 	 * Otherwise, {@code alt} is returned.
+	 * 
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to a long.
+	 * @return The value of this element coerced to a long if possible, otherwise {@code alt}.
 	 */
 	public long asLong(long alt) {
 		try {
@@ -377,9 +417,10 @@ public final class JSON {
 	}
 	
 	/**
-	 * If this element be treated as a string (see {@see #asString()}), and that string has at least one character, the first character is returned.
+	 * If this element be treated as a string (see {@link #asString()}), and that string has at least one character, the first character is returned.
 	 * 
-	 * @throws JSONException If this key is null, or non existent, or cannot be converted to a string, or the string is empty.
+	 * @return The value of this element coerced to a char if possible.
+	 * @throws JSONException If the element is non-existent or not convertible to a char.
 	 */
 	public char asChar() {
 		String s = asString();
@@ -391,6 +432,9 @@ public final class JSON {
 	 * If this element can be treated as a string, and that string has at least one character, the first character is returned.
 	 * 
 	 * Otherwise, {@code alt} is returned.
+	 * 
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to a char.
+	 * @return The value of this element coerced to a char if possible, otherwise {@code alt}.
 	 */
 	public char asChar(char alt) {
 		try {
@@ -403,7 +447,10 @@ public final class JSON {
 	/**
 	 * If this element is a string that represents one of the {@code enumType}'s values (case sensitive first, then uppercased), it is returned.
 	 * 
-	 * @throws JSONException If this key is null, or non existent, or not a string, or not one of the enum's values.
+	 * @param <E> Same as {@code enumType}.
+	 * @param enumType The enum type to coerce this element to.
+	 * @return The value of this element coerced to {@code enumType} if possible.
+	 * @throws JSONException If the element is non-existent or not convertible to {@code enumType}.
 	 */
 	public <E extends Enum<E>> E asEnum(Class<E> enumType) {
 		if (self == NULL) return null;
@@ -427,6 +474,11 @@ public final class JSON {
 	 * If this element is a string that represents one of {@code enumType}'s values (case sensitive first, then uppercased), returns that.
 	 * 
 	 * If this element is null, or doesn't exist, or isn't such a string, {@code alt} is returned instead.
+	 * 
+	 * @param <E> Same as {@code enumType}.
+	 * @param enumType The enum type to coerce this element to.
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to {@code enumType}.
+	 * @return The value of this element coerced to {@code enumType} if possible, otherwise {@code alt}.
 	 */
 	public <E extends Enum<E>> E asEnum(Class<E> enumType, E alt) {
 		try {
@@ -449,7 +501,8 @@ public final class JSON {
 	 * <li>If this element is a string and equal to one of 'true yes 1 t y on', {@code true} is returned, if equal to one of 'false no 0 f n off', {@code false} is returned, otherwise an exception is thrown.
 	 * </ul>
 	 * 
-	 * @throws JSONException If this element doesn't exist, is null, or can't be interpreted as a boolean.
+	 * @return The value of this element coerced to a boolean if possible.
+	 * @throws JSONException If the element is non-existent or not convertible to a boolean.
 	 */
 	public boolean asBoolean() {
 		if (self instanceof Boolean) return ((Boolean) self).booleanValue();
@@ -468,7 +521,10 @@ public final class JSON {
 	/**
 	 * Interprets this element as a boolean and returns its value.
 	 * 
-	 * Works as {@see #asBoolean()}, but returns {@code alt} instead of throwing a {@code JSONException}.
+	 * Works as {@link #asBoolean()}, but returns {@code alt} instead of throwing a {@code JSONException}.
+	 * 
+	 * @param alt The value to return if this node is non-existent, {@code null} or can't be coerced to a boolean.
+	 * @return The value of this element coerced to a boolean if possible, otherwise {@code alt}.
 	 */
 	public boolean asBoolean(boolean alt) {
 		try {
@@ -650,6 +706,8 @@ public final class JSON {
 	 * </ul>
 	 * 
 	 * The list is read-only and does not support listIterator.
+	 * 
+	 * @return This element, coerced to a list.
 	 */
 	public List<JSON> asList() {
 		return new JSONList(this, 0, -1);
@@ -682,6 +740,7 @@ public final class JSON {
 	 * <li>If the element is a map (javascript object), its keys are returned.<li>
 	 * </ul>
 	 * 
+	 * @return The keys in this element, if it is a map.
 	 * @throws JSONException If the element is some other type.
 	 */
 	public Set<String> keySet() throws JSONException {
@@ -709,6 +768,7 @@ public final class JSON {
 	 * 
 	 * If this element is undefined, this call still works; intermediate elements will be created if you call .setT().
 	 * 
+	 * @return A {@code JSON} object pointing at the end of this element coerced to a list.
 	 * @throws JSONException If this element exists is not a list.
 	 */
 	public JSON add() {
@@ -723,6 +783,7 @@ public final class JSON {
 	/**
 	 * Travels 1 level up the path if possible. This is the opposite of the {@code get()} methods.
 	 * 
+	 * @return A {@code JSON} object pointing to the parent of what this node points at (undoes the last {@code get()}).
 	 * @throws JSONException If this is a root-level element.
 	 */
 	public JSON up() {
@@ -737,6 +798,8 @@ public final class JSON {
 	 * Travels back to the top element.
 	 * 
 	 * This is equivalent to undoing all {@code get()} calls. If this is already a root level reference, this method returns itself.
+	 * 
+	 * @return A {@code JSON} object pointing to the top of what this node points at (undoes all {@code get()} calls).
 	 */
 	public JSON top() {
 		if (path.length == 0) return this;
@@ -749,6 +812,9 @@ public final class JSON {
 	 * If the index doesn't exist, a pointer to a non-existent place is returned. asX() calls return the default or throw an exception, and the
 	 * various set methods will attempt to create the structure you have made if possible. If this element isn't a list, a non-existent pointer
 	 * is returned and the various set methods will throw an exception.
+	 * 
+	 * @param idx Returns a pointer to the element at this index into this element (coerced to a list).
+	 * @return A {@code JSON} object pointing to the {@code idx}th element within this element if coerced to a list.
 	 */
 	public JSON get(int idx) {
 		if (idx < 0) {
@@ -772,26 +838,30 @@ public final class JSON {
 	 * If the key doesn't exist, a pointer to a non-existent place is returned. asX() calls return the default or throw an exception, and the
 	 * various set methods will attempt to create the structure you have made if possible. If this element isn't a list, a non-existent pointer
 	 * is returned and the various set methods will throw an exception.
+	 * 
+	 * @param key Returns a pointer to the element at this key into this element (coerced to a map (javascript object)).
+	 * @return A {@code JSON} object pointing to the element with key {@code key} element within this element if coerced to a list.
 	 */
-	public JSON get(String path) {
+	public JSON get(String key) {
 		Object newSelf = UNDEFINED;
-		if (self instanceof Map<?, ?>) newSelf = ((Map<?, ?>) self).get(path);
+		if (self instanceof Map<?, ?>) newSelf = ((Map<?, ?>) self).get(key);
 		if (newSelf == null) newSelf = UNDEFINED;
 		
-		return new JSON(addToPath(this.path, path), object, newSelf);
+		return new JSON(addToPath(this.path, key), object, newSelf);
 	}
 	
 	/**
 	 * Tries to set the current element according to the provided non-collection data type.
 	 * 
-	 * If this element is a root, this operation will fail.<br />
-	 * If this element is a member of a list or map, it is updated.<br />
+	 * If this element is a root, this operation will fail.<br>
+	 * If this element is a member of a list or map, it is updated.<br>
 	 * If this element is non-existent, each parent element is created if possible.
 	 * <p>
 	 * Supported types: All primitive wrappers, strings, enums, and JSON.
-	 * <br />
-	 * Not supported: lists and maps (use {@code mixin()}).
+	 * <br>
+	 * Not supported: lists and maps (use {link mixin(JSON)}).
 	 * 
+	 * @param value The JSON is updated so that the path of this element now has this value.
 	 */
 	public void setObject(Object value) {
 		if (value == null) setNull();
@@ -861,6 +931,8 @@ public final class JSON {
 	 * If this element and the provided element are both lists, or both maps, this list/map is updated with the data from {@code json}.
 	 * 
 	 * Existing elements are overwritten.
+	 * 
+	 * @param json The JSON (representing a list or map) to mix into this JSON that must also be a list or map.
 	 */
 	@SuppressWarnings("unchecked")
 	public void mixin(JSON json) {
