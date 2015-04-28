@@ -48,8 +48,7 @@ then you can query values from it like so:
 
 The above snippet also shows how all the asX methods take an optional default.
 
-It is perfectly acceptable to `get` your way into non-existent nodes; this does not cause an error, and if you try to get a value from such a non-existent node, you'll always get
-the default, or an exception if you didn't specify a default. This is not only convenient, as many JSON services simply omit information that isn't available, but is also the mechanism with which you can create new JSON. For example, to recreate the above JSON programatically:
+It is perfectly acceptable to `get` your way into non-existent nodes; this does not cause an error, and if you try to get a value from such a non-existent node, you'll always get the default, or an exception if you didn't specify a default. This is not only convenient, as many JSON services simply omit information that isn't available, but is also the mechanism with which you can create new JSON. For example, to recreate the above JSON programatically:
 
 	JSON json = JSON.newMap();
 	JSON serenity = json.get("films").add();
@@ -66,7 +65,7 @@ the default, or an exception if you didn't specify a default. This is not only c
 Once you've navigated your way to a map node, you can use `keySet()` to loop through each key. In JSON, all keys are always strings. For example:
 
 	JSON json = JSON.parse(movieData);
-	for (String key : json.get("films").get(0)) {
+	for (String key : json.get("films").get(0).keySet()) {
 		System.out.println(key);
 	}
 
@@ -80,7 +79,7 @@ To navigate through a list node, use the `asList()` method:
 
 The `asList()` method is smart enough to have zero size if the node doesn't exist, and to form a list containing just one element if you're on a simple (non-list, non-map) element. In fact, this applies generally to the com.zwitserloot.json library: For example, trying to grab a string node via 'asInt()' will attempt to parse the string as an int.
 
-There are also a few convenience methods, such as a way to treat a json object as a list of strings.
+There are also a few convenience methods, such as a way to treat a json object as a list of strings: `asStringList()`.
 
 ### Writing lists and maps
 
