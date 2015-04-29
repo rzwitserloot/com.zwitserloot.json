@@ -1,5 +1,9 @@
 # com.zwitserloot.json
 
+### Downloading
+
+You can download source, javadoc, and binaries from [https://github.com/rzwitserloot/com.zwitserloot.json/releases](https://github.com/rzwitserloot/com.zwitserloot.json/releases)
+
 ## How to compile / develop
 
 run:
@@ -9,9 +13,20 @@ run:
 and that's that. All dependencies will be downloaded automatically. Once you've run ant, you can also open the project directory as an eclipse project.
 The runtime jar will be in the `dist` directory.
 
+## General principle
+
+JSON comes from javascript, which is not an explicitly typed language. Therefore, when trying to work with JSON from java, it is a good idea to be explicit about what type you
+think some element in the JSON data should be and coerce whatever's there to this type; this matches how javascript and other similar languages deal with JSON.
+
+This library does just that: You treat JSON as a directory-like structure and then query keys by stating what type you think it should be. This library will then find this element
+in the JSON and goes to some lengths to coerce it to the requested type, including parsing strings into numbers and upgrading single elements into lists with 1 element in them, if
+that's what you expected. Furthermore, all query methods have a second form with a default value to return if the element isn't in the JSON data.
+
+This is _not_ a library for 'marshalling' (the notion of converting JSON into java POJOs and back). That is much more complicated and heavyweight.
+
 ## How to use
 
-The general idea is that you work with an instance of the `JSON` class, and specifying the type you expected / want directly. So, to read something:
+The simplest example of reading something:
 
 	String value = json.asString();
 	int value = json.asInt();
@@ -46,9 +61,9 @@ then you can query values from it like so:
 	JSON json = JSON.parse(theAboveJSONString);
 	int jossWhedonsAge = json.get("films").get(0).get("director").get("age").asInt(-1);
 
-The above snippet also shows how all the asX methods take an optional default.
+The above snippet also shows how all the `asX` methods take an optional default.
 
-It is perfectly acceptable to `get` your way into non-existent nodes; this does not cause an error, and if you try to get a value from such a non-existent node, you'll always get the default, or an exception if you didn't specify a default. This is not only convenient, as many JSON services simply omit information that isn't available, but is also the mechanism with which you can create new JSON. For example, to recreate the above JSON programatically:
+It is perfectly acceptable to `get()` your way into non-existent nodes; this does not cause an error, and if you try to get a value from such a non-existent node, you'll always get the default, or an exception if you didn't specify a default, or an empty list / keyset if you try to coerce the value to a list or map. This is not only convenient, as many JSON services simply omit information that isn't available, but is also the mechanism with which you can create new JSON. For example, to recreate the above JSON programatically:
 
 	JSON json = JSON.newMap();
 	JSON serenity = json.get("films").add();
@@ -58,7 +73,7 @@ It is perfectly acceptable to `get` your way into non-existent nodes; this does 
 	JSON fewGoodMen = json.get("films").add();
 	fewGoodMen.get("name").setString("A few good men");
 	fewGoodMen.get("director").get("name").setString("Rob Reiner");
-	String jsonString = json.toJSON();
+	String jsonString = json.prettyPrint();
 
 ### Reading from lists and maps
 
@@ -77,14 +92,28 @@ To navigate through a list node, use the `asList()` method:
 		...
 	}
 
-The `asList()` method is smart enough to have zero size if the node doesn't exist, and to form a list containing just one element if you're on a simple (non-list, non-map) element. In fact, this applies generally to the com.zwitserloot.json library: For example, trying to grab a string node via 'asInt()' will attempt to parse the string as an int.
+The `asList()` method is smart enough to have zero size if the node doesn't exist, and to form a list containing just one element if you're on a simple (non-list, non-map) element.
 
-There are also a few convenience methods, such as a way to treat a json object as a list of strings: `asStringList()`.
+As a convenience, there's also `asStringList()` which will coerce all elements inside the list to a string.
 
 ### Writing lists and maps
 
 You've already seen how to write maps; just `get` the key name then start using the `setX` methods. To write into a list, use the magic `add()` method. add() itself doesn't actually create anything, but once you start writing to a JSON instance returned by the `add()` method, writing occurs. See the 'write' example from earlier.
 
-### Downloading
+#### Printing
 
-You can download source, javadoc, and binaries from [http://github.com/rzwitserloot/com.zwitserloot.json/downloads](http://github.com/rzwitserloot/com.zwitserloot.json/downloads)
+A JSON object can be rendered as minified JSON with the `toJSON()` method, or as pretty-printed JSON with the `prettyPrint()` method.
+
+### Advanced topics
+
+* You can use `mixin(JSON)` to merge 2 separate JSON lists or 2 separate JSON maps.
+* You can use `setWithJSON(JSON)` to put some JSON inside another JSON object.
+* You can use `setIsMap()` and `setIsList()` to enforce empty maps/lists.
+* You can use `deepCopy()` to create a 'deep' clone such that changes to one will not affect the other.
+* You can use `getPath()`, `up()` and `top()` to treat the JSON object as a directory pointer of sorts.
+
+### Changelog
+
+#### v1.2
+
+* Pretty printing

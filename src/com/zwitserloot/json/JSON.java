@@ -1,6 +1,6 @@
 package com.zwitserloot.json;
 
-import static com.zwitserloot.json.JSONParser.NULL;
+import static com.zwitserloot.json.JSONParser.*;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -131,10 +131,34 @@ public final class JSON {
 	}
 	
 	/**
-	 * @return Converts the this element to compact JSON representation and returns it.
+	 * @return Converts the this element to minified JSON representation and returns it.
 	 */
 	public String toJSON() {
-		return JSONWriter.toJSON(self);
+		StringBuilder sb = new StringBuilder();
+		JSONWriter.toJSON(sb, self, Integer.MIN_VALUE);
+		return sb.toString();
+	}
+	
+	/**
+	 * @return Converts the this element to pretty-printed JSON representation and returns it.
+	 */
+	public String prettyPrint() {
+		StringBuilder sb = new StringBuilder();
+		JSONWriter.toJSON(sb, self, 0);
+		if (self instanceof Map<?, ?> || self instanceof List<?>) sb.append("\n");
+		return sb.toString();
+	}
+	
+	/**
+	 * @return Returns the path along with the pretty printed JSON that it represents, currently. Use {@link #prettyPrint()} if you want pretty printed JSON.
+	 */
+	@Override public String toString() {
+		StringBuilder sb = new StringBuilder();
+		sb.append(getPath()).append(": ");
+		if (self == UNDEFINED) return sb.append("UNDEFINED").toString();
+		JSONWriter.toJSON(sb, self, 0);
+		if (self instanceof Map<?, ?> || self instanceof List<?>) sb.append("\n");
+		return sb.toString();
 	}
 	
 	/**
@@ -242,7 +266,13 @@ public final class JSON {
 	public String asString() {
 		if (self == NULL) return null;
 		if (self instanceof String) return (String) self;
-		if (self instanceof Number || self instanceof Boolean) return String.valueOf(self);
+		if (self instanceof Boolean) return String.valueOf(self);
+		if (self instanceof Number) {
+			double d = ((Number) self).doubleValue();
+			long v = (long) d;
+			if (v == d) return String.valueOf(v);
+			return String.valueOf(d);
+		}
 		invalidType("string");
 		return null;
 	}
@@ -355,8 +385,6 @@ public final class JSON {
 		if (v == v2) return v2;
 		return alt;
 	}
-	
-	private static final long MAXIMUM_PRECISION_DOUBLE = 1L << 52 -1;
 	
 	/**
 	 * If this element is a number that has no floating point component, or has sufficient magnitude that a double cannot accurately represent it, or
@@ -721,7 +749,13 @@ public final class JSON {
 			List<String> out = new ArrayList<String>(raw.size());
 			int idx = 0;
 			for (Object o : raw) {
-				if (o instanceof String || o instanceof Number || o instanceof Boolean) out.add(String.valueOf(o));
+				if (o instanceof String || o instanceof Boolean) out.add(String.valueOf(o));
+				else if (o instanceof Number) {
+					double d = ((Number) o).doubleValue();
+					long v = (long) d;
+					if (v == d) out.add(String.valueOf(v));
+					else out.add(String.valueOf(d));
+				}
 				else if (o == NULL) out.add(null);
 				else throw new JSONException("List item at " + idx + " is not convertable to a string because it is a " + typeOf(o));
 			}
@@ -853,6 +887,8 @@ public final class JSON {
 	/**
 	 * Tries to set the current element according to the provided non-collection data type.
 	 * 
+	 * Generally you should use a more specific {@code setX()} method.
+	 * <p>
 	 * If this element is a root, this operation will fail.<br>
 	 * If this element is a member of a list or map, it is updated.<br>
 	 * If this element is non-existent, each parent element is created if possible.
@@ -865,9 +901,8 @@ public final class JSON {
 	 */
 	public void setObject(Object value) {
 		if (value == null) setNull();
-		else if (value instanceof Short || value instanceof Byte) setInt(((Number) value).intValue());
-		else if (value instanceof Float) setDouble(((Float) value).doubleValue());
-		else if (value instanceof Integer || value instanceof Double || value instanceof String || value instanceof Boolean) createAndSet(value);
+		else if (value instanceof Short || value instanceof Byte || value instanceof Integer || value instanceof Float) createAndSet(((Number) value).doubleValue());
+		else if (value instanceof Double || value instanceof String || value instanceof Boolean) createAndSet(value);
 		else if (value instanceof Long) setLong(((Long) value).longValue());
 		else if (value instanceof Character) setChar(((Character) value).charValue());
 		else if (value instanceof Enum<?>) setEnum((Enum<?>) value);
@@ -875,14 +910,38 @@ public final class JSON {
 		else throw new JSONException("Unknown type: " + value.getClass());
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this number value.
+	 */
 	public void setInt(int value) {
-		createAndSet(value);
+		createAndSet((double) value);
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this number value.
+	 */
 	public void setDouble(double value) {
 		createAndSet(value);
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * <p>
+	 * This will render the long as a string if it cannot be accurately represented by a double (this is true only for extremely large positive or negative values),
+	 * because numbers in JSON are actually doubles.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this number value.
+	 */
 	public void setLong(long value) {
 		if (value <= -MAXIMUM_PRECISION_DOUBLE || value >= MAXIMUM_PRECISION_DOUBLE) {
 			setString(String.valueOf(value));
@@ -891,14 +950,35 @@ public final class JSON {
 		}
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this string value.
+	 */
 	public void setString(String value) {
 		createAndSet(value);
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this boolean value.
+	 */
 	public void setBoolean(boolean value) {
 		createAndSet(value);
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this enum value (the enum's {@code name()}).
+	 */
 	public void setEnum(Enum<?> value) {
 		if (value == null) {
 			createAndSet(null);
@@ -907,22 +987,78 @@ public final class JSON {
 		}
 	}
 	
+	/**
+	 * Tries to set the current element with the given value.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now has this char value (single character string).
+	 */
 	public void setChar(char value) {
 		setString(String.valueOf(value));
 	}
 	
+	/**
+	 * Tries to set the current element as {@code null}.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @param value The JSON is updated so that the path of this element now is {@code null}.
+	 */
 	public void setNull() {
 		createAndSet(null);
 	}
 	
+	/**
+	 * Tries to set the current element as a fresh empty list.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 */
 	public void setEmptyList() {
 		createAndSet(new ArrayList<Object>());
 	}
 	
+	/**
+	 * Sets this element to be a list if it currently is {@code null} or non-existent.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @throws JSONException If the current element is not null, already a list, or non-existent.
+	 */
+	public void setIsList() throws JSONException {
+		if (self instanceof List<?>) return;
+		if (self == NULL || self == UNDEFINED) createAndSet(new ArrayList<Object>());
+		invalidType("array");
+	}
+	
+	/**
+	 * Tries to set the current element as a fresh empty map (javascript object).
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 */
 	public void setEmptyMap() {
 		createAndSet(new LinkedHashMap<Object, Object>());
 	}
 	
+	/**
+	 * Sets this element to be a map if it currently is {@code null} or non-existent.
+	 * <p>
+	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
+	 * 
+	 * @throws JSONException If the current element is not null, already a map, or non-existent.
+	 */
+	public void setIsMap() throws JSONException {
+		if (self instanceof Map<?, ?>) return;
+		if (self == NULL || self == UNDEFINED) createAndSet(new LinkedHashMap<Object, Object>());
+		invalidType("object");
+	}
+	
+	/**
+	 * Replaces this element with the contents of the provided JSON object.
+	 * 
+	 * @see #deepCopy()
+	 * @param json The json object to import into this object. It is a shallow copy (changes are reflected in both).
+	 */
 	public void setWithJSON(JSON json) {
 		createAndSet(json.self);
 	}
@@ -1016,12 +1152,6 @@ public final class JSON {
 			o = z;
 			k = m; x = y;
 		}
-	}
-	
-	@Override public String toString() {
-		if (self == UNDEFINED) return getPath() + ": UNDEFINED";
-		
-		return getPath() + ": " + JSONWriter.toJSON(self);
 	}
 	
 	// Error throwing utility methods

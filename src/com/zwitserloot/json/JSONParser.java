@@ -11,7 +11,9 @@ class JSONParser {
 	private final String string;
 	private final int len;
 	private int pos = 0;
+	
 	static final Object NULL = new Object();
+	static final long MAXIMUM_PRECISION_DOUBLE = 1L << 52 -1;
 	
 	JSONParser(String string) {
 		this.string = stripComments(string);
@@ -152,8 +154,8 @@ class JSONParser {
 				}
 			}
 			
-			if (((int)val) == val) return Integer.valueOf((int)val);
-			else return Long.valueOf(val);
+			if (val > MAXIMUM_PRECISION_DOUBLE || val < -MAXIMUM_PRECISION_DOUBLE) return Long.valueOf(val);
+			return Double.valueOf(val);
 		}
 	}
 	

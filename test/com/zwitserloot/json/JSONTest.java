@@ -350,4 +350,27 @@ public class JSONTest{
 		json.add().setObject(Byte.valueOf((byte) 2));
 		assertEquals("[5,5,5.00001,2]", json.toJSON());
 	}
+	
+	@Test
+	public void testPrettyPrinter() {
+		JSON json = JSON.parse("[5, 10.5, 5.0, \"foobar\", [], [true, null, false], \"more\", null, false]");
+		assertEquals("[5,10.5,5,\"foobar\",[],[true,null,false],\"more\",null,false]", json.toJSON());
+		assertEquals(json.asObject(), JSON.parse(json.toJSON()).asObject());
+		assertEquals("[\n  5,\n  10.5,\n  5,\n  \"foobar\",\n  [],\n  [\n    true,\n    null,\n    false\n  ],\n  \"more\",\n  null,\n  false\n]\n", json.prettyPrint());
+		assertEquals(json.asObject(), JSON.parse(json.prettyPrint()).asObject());
+		
+		JSON maps = JSON.parse("[5, 10.5, {foo: 5.0}, {\"bar\": \"foobar\", baz: {\n}, \"weird\t\": {foo: true}}]");
+		assertEquals("[5,10.5,{\"foo\":5},{\"bar\":\"foobar\",\"baz\":{}," +
+				"\"weird\\t\":{\"foo\":true}}]", maps.toJSON());
+		assertEquals(maps.asObject(), JSON.parse(maps.toJSON()).asObject());
+		assertEquals("[\n  5,\n  10.5,\n  {\n    \"foo\": 5\n  },\n  {\n    \"bar\": \"foobar\",\n    \"baz\": {}," +
+				"\n    \"weird\\t\": {\n      \"foo\": true\n    }\n  }\n]\n", maps.prettyPrint());
+		assertEquals(maps.asObject(), JSON.parse(maps.prettyPrint()).asObject());
+	}
+	
+	@Test
+	public void testStringEscaping() {
+		JSON json = JSON.parse("\"foo\\nbar\t\t\u00EB\\\"\"");
+		assertEquals("\"foo\\nbar\\t\\t\\u00eb\\\"\"", json.prettyPrint());
+	}
 }
