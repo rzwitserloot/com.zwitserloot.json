@@ -1002,8 +1002,6 @@ public final class JSON {
 	 * Tries to set the current element as {@code null}.
 	 * <p>
 	 * See {@link #setObject(Object)} for details on how {@code setX()} methods work.
-	 * 
-	 * @param value The JSON is updated so that the path of this element now is {@code null}.
 	 */
 	public void setNull() {
 		createAndSet(null);
