@@ -117,4 +117,42 @@ Example use: JSON.parse(someJsonString).get("films").get(0).get("director").get(
 		</junit>
 		<echo level="info">All tests successful.</echo>
 	</target>
+
+	<target name="maven" depends="dist" description="Build a maven artifact bundle.">
+		<mkdir dir="build/mavenPublish" />
+		<copy tofile="build/mavenPublish/json-${version}.pom" overwrite="true" file="maven-pom.xml">
+			<filterchain>
+				<replacetokens>
+					<token key="VERSION" value="${version}" />
+				</replacetokens>
+			</filterchain>
+		</copy>
+		<copy tofile="build/mavenPublish/json-${version}-javadoc.jar" overwrite="true" file="dist/com.zwitserloot.json-javadoc-${version}.zip" />
+		<copy tofile="build/mavenPublish/json-${version}-sources.jar" overwrite="true" file="dist/com.zwitserloot.json-src-${version}.zip" />
+		<copy tofile="build/mavenPublish/json-${version}.jar" overwrite="true" file="dist/com.zwitserloot.json-${version}.jar" />
+		<exec executable="gpg">
+			<arg value="-ab" />
+			<arg value="build/mavenPublish/json-${version}.pom" />
+		</exec>
+		<exec executable="gpg">
+			<arg value="-ab" />
+			<arg value="build/mavenPublish/json-${version}-javadoc.jar" />
+		</exec>
+		<exec executable="gpg">
+			<arg value="-ab" />
+			<arg value="build/mavenPublish/json-${version}-sources.jar" />
+		</exec>
+		<exec executable="gpg">
+			<arg value="-ab" />
+			<arg value="build/mavenPublish/json-${version}.jar" />
+		</exec>
+		<jar destfile="build/mavenPublish/bundle-com.zwitserloot-json-${version}.jar">
+			<fileset dir="build/mavenPublish">
+				<include name="*.jar" />
+				<include name="*.pom" />
+				<include name="*.asc" />
+			</fileset>
+		</jar>
+		<echo>Bundle ready for upload to oss.sonatype.org created at build/mavenPublish/bundle-com.zwitserloot-json-${version}.jar</echo>
+	</target>
 </project>
